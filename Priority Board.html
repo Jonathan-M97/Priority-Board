@@ -1,0 +1,1404 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Priority Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap">
+<style>
+/* Layout: brain-dump list on the left, 2x2 Eisenhower matrix on the right; items keep their place in the list and take on their quadrant's color */
+:root {
+  --bg: #f3f4f1;
+  --panel: #ffffff;
+  --fg: #1d2124;
+  --muted: #6b7378;
+  --line: #dde0dc;
+  --hover: #eceee9;
+  --q1: #c63f2b; --q1-tint: #f8e3df;
+  --q2: #3b93e0; --q2-tint: #e0eefb;
+  --q3: #6fa83a; --q3-tint: #e6f1da;
+  --q4: #e2702a; --q4-tint: #fbe4d5;
+  --q5: #e6a417; --q5-tint: #fbf0d4;
+  --c-red: #c63f2b; --c-red-tint: #f8e3df;
+  --c-orange: #e2702a; --c-orange-tint: #fbe4d5;
+  --c-amber: #e6a417; --c-amber-tint: #fbf0d4;
+  --c-green: #6fa83a; --c-green-tint: #e6f1da;
+  --c-teal: #1f9a8f; --c-teal-tint: #d6efec;
+  --c-blue: #3b93e0; --c-blue-tint: #e0eefb;
+  --c-indigo: #5560d6; --c-indigo-tint: #e3e5f8;
+  --c-purple: #9050c8; --c-purple-tint: #efe3f8;
+  --c-pink: #d24b8a; --c-pink-tint: #f9e1ec;
+  --c-slate: #66737d; --c-slate-tint: #e7eaec;
+  --on-q: #ffffff;
+  --display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --body: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]):not([data-theme="sepia"]) {
+  --bg: #15181a; --panel: #1e2225; --fg: #e9ecea; --muted: #949ca0; --line: #30363a; --hover: #272c2f;
+  --q1: #e05a44; --q1-tint: #3a211d;
+  --q2: #4ea2ec; --q2-tint: #182c3e;
+  --q3: #85bf4f; --q3-tint: #22301a;
+  --q4: #ee8546; --q4-tint: #3a2417;
+  --q5: #f0b330; --q5-tint: #3a2f14;
+  --c-red: #e05a44; --c-red-tint: #3a211d;
+  --c-orange: #ee8546; --c-orange-tint: #3a2417;
+  --c-amber: #f0b330; --c-amber-tint: #3a2f14;
+  --c-green: #85bf4f; --c-green-tint: #22301a;
+  --c-teal: #3cb7aa; --c-teal-tint: #15302d;
+  --c-blue: #4ea2ec; --c-blue-tint: #182c3e;
+  --c-indigo: #7880ec; --c-indigo-tint: #1f2240;
+  --c-purple: #a875dc; --c-purple-tint: #2b1f38;
+  --c-pink: #e46aa2; --c-pink-tint: #3a1d2b;
+  --c-slate: #8d99a3; --c-slate-tint: #262c30;
+  --on-q: #ffffff; color-scheme: dark;
+}}
+:root[data-theme="dark"] {
+  --bg: #15181a; --panel: #1e2225; --fg: #e9ecea; --muted: #949ca0; --line: #30363a; --hover: #272c2f;
+  --q1: #e05a44; --q1-tint: #3a211d;
+  --q2: #4ea2ec; --q2-tint: #182c3e;
+  --q3: #85bf4f; --q3-tint: #22301a;
+  --q4: #ee8546; --q4-tint: #3a2417;
+  --q5: #f0b330; --q5-tint: #3a2f14;
+  --c-red: #e05a44; --c-red-tint: #3a211d;
+  --c-orange: #ee8546; --c-orange-tint: #3a2417;
+  --c-amber: #f0b330; --c-amber-tint: #3a2f14;
+  --c-green: #85bf4f; --c-green-tint: #22301a;
+  --c-teal: #3cb7aa; --c-teal-tint: #15302d;
+  --c-blue: #4ea2ec; --c-blue-tint: #182c3e;
+  --c-indigo: #7880ec; --c-indigo-tint: #1f2240;
+  --c-purple: #a875dc; --c-purple-tint: #2b1f38;
+  --c-pink: #e46aa2; --c-pink-tint: #3a1d2b;
+  --c-slate: #8d99a3; --c-slate-tint: #262c30;
+  --on-q: #ffffff; color-scheme: dark;
+}
+:root[data-theme="sepia"] {
+  --bg: #efe6d4; --panel: #faf4e7; --fg: #3a2e22; --muted: #7b6a55; --line: #ddcdb0; --hover: #ebdfc8;
+  --q1: #b8492f; --q1-tint: #f3dccf;
+  --q2: #4b82b8; --q2-tint: #dde6ea;
+  --q3: #6f9a3e; --q3-tint: #e3e8cf;
+  --q4: #cf7432; --q4-tint: #f4ddc5;
+  --q5: #d29a26; --q5-tint: #f4e6c4;
+  --c-red: #b8492f; --c-red-tint: #f3dccf;
+  --c-orange: #cf7432; --c-orange-tint: #f4ddc5;
+  --c-amber: #d29a26; --c-amber-tint: #f4e6c4;
+  --c-green: #6f9a3e; --c-green-tint: #e3e8cf;
+  --c-teal: #3c8f84; --c-teal-tint: #d9e6dc;
+  --c-blue: #4b82b8; --c-blue-tint: #dde6ea;
+  --c-indigo: #5e66b8; --c-indigo-tint: #e1e0e8;
+  --c-purple: #8a5aa8; --c-purple-tint: #ebdfe6;
+  --c-pink: #b9557f; --c-pink-tint: #f2dcdc;
+  --c-slate: #6f6a62; --c-slate-tint: #e6ddcc;
+  --on-q: #ffffff; color-scheme: light;
+}
+
+html, body { height: 100%; }
+body { margin: 0; }
+[hidden] { display: none !important; }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 15px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 16px;
+  box-sizing: border-box;
+}
+* { box-sizing: border-box; }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible, input:focus-visible, [contenteditable]:focus-visible { outline: 2px solid var(--q2); outline-offset: 2px; }
+
+.app {
+  display: grid; grid-template-columns: minmax(540px, 660px) auto 1fr 210px; gap: 14px;
+  height: 100%; max-width: 1900px; margin: 0 auto;
+}
+
+/* ---------- Left: brain dump ---------- */
+.dump {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+  display: flex; flex-direction: column; min-height: 0; min-width: 0;
+}
+.dump-head { flex-wrap: wrap; padding: 16px 16px 10px; border-bottom: 1px solid var(--line); display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.dump-head h1 { font-family: var(--display); font-weight: 800; font-size: 26px; letter-spacing: .01em; margin: 0; text-transform: uppercase; }
+.dump-head .tally { white-space: nowrap; color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+.dump-body { overflow-y: auto; padding: 8px 10px 16px; flex: 1; min-height: 0; }
+.dump.drop-target { outline: 2px dashed var(--muted); outline-offset: -6px; }
+.lists { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: minmax(0, 1fr); gap: 14px; min-height: 0; min-width: 0; }
+
+.quad { container-type: inline-size; }
+@container (max-width: 380px) { .quad-hint { display: none; } }
+.quad-title { white-space: nowrap; }
+.chip { flex-wrap: wrap; }
+.chip .text { flex: 1 1 9em; }
+
+/* ---------- Timer focus list ---------- */
+.timer.drop-target { outline: 2px dashed var(--q1); outline-offset: -5px; }
+.t-focus { width: 100%; display: flex; flex-direction: column; gap: 4px; }
+.t-focus .lbl { font-family: var(--display); font-weight: 700; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.t-focus .empty { border: 1px dashed var(--line); border-radius: 6px; padding: 10px 8px; color: var(--muted); font-size: 13px; text-align: center; line-height: 1.35; }
+.f-item { display: flex; align-items: flex-start; gap: 6px; padding: 6px 4px 6px 8px; border-radius: 6px; background: var(--bg); border-left: 4px solid var(--line); font-size: 14px; line-height: 1.3; }
+.f-item.on { border-left-color: var(--box); }
+.f-item .text { flex: 1; min-width: 0; cursor: default; }
+.f-item.done .text { text-decoration: line-through; color: var(--muted); }
+.f-item .icon-btn { padding: 2px; }
+
+/* ---------- Locate in list ---------- */
+.chip, .f-item { cursor: pointer; }
+@keyframes locate {
+  0%, 30% { box-shadow: 0 0 0 3px var(--fg); background-color: var(--hover); }
+  100% { box-shadow: 0 0 0 3px transparent; }
+}
+.item.locate { animation: locate 1.8s ease-out; }
+@media (prefers-reduced-motion: reduce) { .item.locate { animation: none; outline: 3px solid var(--fg); } }
+
+/* ---------- Customize labels ---------- */
+[data-edit-label] { cursor: text; border-radius: 4px; }
+.confirm-box.set-box { width: min(660px, 100%); max-height: calc(100vh - 32px); overflow-y: auto; }
+.set-box .sub { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.45; }
+.set-group { display: flex; flex-direction: column; gap: 8px; padding-top: 6px; }
+.set-group h4 { margin: 0; font-family: var(--display); font-weight: 700; font-size: 13px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.set-row { display: grid; grid-template-columns: 14px minmax(0, 1fr) minmax(0, 1.4fr); gap: 8px; align-items: center; }
+.set-row.two { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.set-row .sw { width: 14px; height: 14px; border-radius: 4px; }
+.set-row .sw { background: var(--box); }
+.set-quad { border: 1px solid var(--line); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+.set-quad-head { display: flex; align-items: center; gap: 8px; }
+.set-quad-head b { font-weight: 600; font-size: 14px; flex: 1; }
+.set-quad-head .mini { padding: 4px 10px; font-size: 12px; }
+.set-quads { display: grid; grid-template-columns: 1fr; gap: 8px; }
+.set-row.box { grid-template-columns: 26px 104px minmax(0, 1fr) minmax(0, 1.3fr); align-items: end; gap: 8px; }
+.set-row.box .fields { display: contents; }
+.set-row.box .num { width: 26px; height: 26px; border-radius: 13px; background: var(--box); color: var(--on-q); display: grid; place-items: center; font-family: var(--display); font-weight: 700; font-size: 13px; margin-bottom: 5px; }
+.set-field select { width: 100%; font: inherit; font-size: 14px; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-left: 6px solid var(--box); border-radius: 6px; padding: 6px 4px; }
+.set-quad .note { font-size: 12px; color: var(--muted); }
+.set-count { font-size: 12px; color: var(--muted); font-weight: 400; letter-spacing: 0; text-transform: none; }
+@media (max-width: 560px) {
+  .set-row.box { grid-template-columns: 26px minmax(0, 1fr); }
+  .set-row.box .set-field { grid-column: 2; }
+  .set-row.box .num { grid-row: 1; align-self: start; margin: 18px 0 0; }
+}
+.set-field { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.set-field span { font-size: 12px; color: var(--muted); }
+.set-field input { width: 100%; font: inherit; font-size: 14px; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 7px 8px; }
+.set-field input:focus { outline: 2px solid var(--q2); outline-offset: 0; }
+.set-box .row { justify-content: space-between; flex-wrap: wrap; }
+.set-box .row .right { display: flex; gap: 8px; }
+.set-box .defaults { background: none; border: 0; color: var(--muted); text-decoration: underline; text-underline-offset: 2px; padding: 8px 0; }
+.set-box .defaults:hover { color: var(--fg); }
+.confirm-box.set-box .go { background: var(--fg); color: var(--panel); }
+@media (max-width: 520px) { .set-row { grid-template-columns: 14px minmax(0, 1fr); } .set-row .set-field:last-child { grid-column: 2; } .set-row.two { grid-template-columns: 1fr; } }
+
+.theme-pick { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.theme-pick label { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px 4px; border: 1px solid var(--line); border-radius: 8px; cursor: pointer; font-size: 13px; }
+.theme-pick input { position: absolute; opacity: 0; pointer-events: none; }
+.theme-pick label:has(input:checked) { border-color: var(--fg); box-shadow: inset 0 0 0 1px var(--fg); font-weight: 600; }
+.theme-pick label:has(input:focus-visible) { outline: 2px solid var(--q2); outline-offset: 2px; }
+.theme-pick .chip-prev { width: 100%; max-width: 64px; height: 30px; border-radius: 5px; border: 1px solid rgba(0,0,0,.15); display: flex; overflow: hidden; }
+.theme-pick .chip-prev i { flex: 1; }
+@media (max-width: 520px) { .theme-pick { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* ---------- Clear board confirmation ---------- */
+.confirm-scrim { position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,.4); display: grid; place-items: center; padding: 16px; }
+.confirm-box { background: var(--panel); color: var(--fg); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,.3); width: min(400px, 100%); padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+.confirm-box h3 { margin: 0; font-family: var(--display); font-weight: 800; font-size: 24px; text-transform: uppercase; letter-spacing: .02em; }
+.confirm-box p { margin: 0; color: var(--muted); line-height: 1.45; }
+.confirm-box .row { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+.confirm-box .cancel { background: none; border: 1px solid var(--line); border-radius: 6px; padding: 8px 14px; color: var(--fg); }
+.confirm-box .cancel:hover { border-color: var(--muted); }
+.confirm-box .go { background: var(--q1); color: var(--on-q); border: 0; border-radius: 6px; padding: 8px 16px; font-weight: 600; }
+.confirm-box .go:hover { opacity: .9; }
+
+/* ---------- Notes ---------- */
+.note-btn { opacity: 0; padding: 3px; }
+.item:hover .note-btn, .item:focus-within .note-btn, .chip:hover .note-btn, .chip:focus-within .note-btn { opacity: 1; }
+.note-btn.has-note { opacity: 1; color: var(--fg); }
+.note-btn.has-note svg .lines { stroke: currentColor; }
+.note-tip, .note-edit {
+  position: fixed; z-index: 90; background: var(--panel); color: var(--fg); border: 1px solid var(--line);
+  border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,.18);
+}
+.note-tip { pointer-events: none; max-width: 320px; padding: 10px 12px; font-size: 14px; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }
+.note-tip .lbl, .note-edit .lbl { display: block; font-family: var(--display); font-weight: 700; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.note-edit { width: min(340px, calc(100vw - 24px)); padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+.note-edit .for { font-weight: 600; font-size: 14px; line-height: 1.3; overflow-wrap: anywhere; }
+.note-edit textarea {
+  width: 100%; min-height: 120px; resize: vertical; font: inherit; font-size: 14px; line-height: 1.45; color: var(--fg);
+  background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 8px;
+}
+.note-edit textarea:focus { outline: 2px solid var(--q2); outline-offset: 0; }
+.note-edit .row { display: flex; align-items: center; gap: 6px; }
+.note-edit .row .hint { color: var(--muted); font-size: 12px; margin-right: auto; }
+.note-edit .save { background: var(--fg); color: var(--panel); border: 0; border-radius: 6px; padding: 6px 14px; font-weight: 600; }
+.note-edit .cancel, .note-edit .clear { background: none; border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px; color: var(--muted); }
+.note-edit .cancel:hover, .note-edit .clear:hover { color: var(--fg); border-color: var(--muted); }
+
+/* ---------- Projects ---------- */
+.cat.drop-target, .proj-sec.drop-target { background: var(--hover); outline: 2px dashed var(--muted); outline-offset: -2px; }
+.cat { border-radius: 8px; }
+.proj-sec { border-radius: 8px; margin-top: 6px; }
+.proj-sec + .proj-sec { border-top: 1px solid var(--line); border-top-left-radius: 0; border-top-right-radius: 0; padding-top: 4px; }
+.proj-head { display: flex; align-items: center; gap: 4px; padding: 6px 4px; border-radius: 6px; }
+.proj-head .chev-btn svg { transition: transform .15s; }
+.proj-sec.collapsed .chev-btn svg { transform: rotate(-90deg); }
+.proj-name { font-family: var(--display); font-weight: 700; font-size: 18px; letter-spacing: .01em; flex: 1; min-width: 0; overflow-wrap: anywhere; border-radius: 4px; padding: 1px 2px; }
+.proj-sec.collapsed .proj-name { color: var(--muted); }
+.proj-head .del-proj { opacity: 0; }
+.proj-head:hover .del-proj, .proj-head:focus-within .del-proj { opacity: 1; }
+.proj-progress { height: 3px; border-radius: 2px; background: var(--line); margin: 0 6px 6px 30px; overflow: hidden; }
+.proj-progress span { display: block; height: 100%; background: var(--fg); opacity: .55; }
+.proj-empty { color: var(--muted); font-size: 13px; padding: 4px 6px 2px 30px; }
+.proj-intro { color: var(--muted); font-size: 14px; line-height: 1.45; padding: 12px 8px 0; }
+
+.cat { margin-top: 10px; }
+.cat-head { display: flex; align-items: center; gap: 6px; padding: 6px 6px 4px; }
+.cat-name {
+  font-family: var(--display); font-weight: 700; font-size: 15px; text-transform: uppercase; letter-spacing: .08em;
+  color: var(--muted); flex: 1; min-width: 0; border-radius: 4px; padding: 1px 2px;
+}
+.cat-count { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.icon-btn { background: none; border: 0; padding: 4px; border-radius: 5px; color: var(--muted); line-height: 0; }
+.icon-btn:hover { background: var(--hover); color: var(--fg); }
+.cat-head .icon-btn { opacity: 0; }
+.cat-head:hover .icon-btn, .cat-head:focus-within .icon-btn { opacity: 1; }
+
+.items { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 3px; }
+.item {
+  display: flex; align-items: flex-start; gap: 8px; padding: 7px 8px 7px 6px; border-radius: 6px;
+  border-left: 4px solid transparent; background: transparent; user-select: none; cursor: grab;
+  transition: background-color .2s, border-color .2s;
+}
+.item:hover { background: var(--hover); }
+.item.on { background: var(--box-tint); border-left-color: var(--box); }
+.item.dragging { opacity: .35; }
+.grip { color: var(--muted); padding-top: 2px; touch-action: none; cursor: grab; line-height: 0; }
+.check {
+  width: 17px; height: 17px; margin-top: 2px; flex: none; border: 1.5px solid var(--muted); border-radius: 4px; background: transparent; padding: 0;
+  display: grid; place-items: center;
+}
+.check svg { opacity: 0; }
+.item.done .check { background: var(--fg); border-color: var(--fg); }
+.item.done .check svg { opacity: 1; color: var(--panel); }
+.text { flex: 1; min-width: 0; line-height: 1.35; overflow-wrap: anywhere; border-radius: 3px; cursor: text; }
+.item.done .text { text-decoration: line-through; color: var(--muted); }
+.badge {
+  flex: none; font-family: var(--display); font-weight: 700; font-size: 11px; min-width: 20px; padding: 0 4px; height: 20px; border-radius: 10px;
+  display: grid; place-items: center; color: var(--on-q); margin-top: 1px;
+}
+.badge { background: var(--box); }
+.item .del { opacity: 0; padding: 2px; }
+.item:hover .del, .item:focus-within .del { opacity: 1; }
+
+.add-row { display: flex; padding: 4px 6px 0 30px; }
+.add-row input {
+  flex: 1; min-width: 0; border: 0; border-bottom: 1px solid transparent; background: transparent; color: var(--fg);
+  font: inherit; padding: 6px 0;
+}
+.add-row input::placeholder { color: var(--muted); }
+.add-row input:focus { outline: none; border-bottom-color: var(--line); }
+.new-cat { margin: 14px 6px 0; background: none; border: 1px dashed var(--line); border-radius: 6px; padding: 8px; width: calc(100% - 12px); color: var(--muted); font-size: 14px; }
+.new-cat:hover { color: var(--fg); border-color: var(--muted); }
+
+.backup { display: flex; gap: 4px; margin-left: auto; }
+.mini { background: none; border: 1px solid var(--line); border-radius: 5px; padding: 2px 8px; font-size: 12px; color: var(--muted); }
+.mini:hover { color: var(--fg); border-color: var(--muted); }
+.dump-head .tally { order: 1; }
+.dump-head h1 { flex: none; }
+
+/* ---------- Middle: clear-board arrow ---------- */
+.reset-col { display: flex; flex-direction: column; align-items: center; justify-content: safe center; gap: 10px; max-height: 100%; overflow-y: auto; scrollbar-width: none; }
+.reset[aria-expanded="true"] { color: var(--fg); border-color: var(--fg); }
+.set-menu {
+  position: fixed; z-index: 95; width: 240px; background: var(--panel); color: var(--fg); border: 1px solid var(--line);
+  border-radius: 10px; box-shadow: 0 12px 32px rgba(0,0,0,.2); padding: 6px; display: flex; flex-direction: column; gap: 2px;
+}
+.set-menu[hidden] { display: none; }
+.menu-item { background: none; border: 0; border-radius: 6px; padding: 8px 10px; text-align: left; display: flex; flex-direction: column; gap: 1px; }
+.menu-item:hover, .menu-item:focus-visible { background: var(--hover); outline: none; }
+.menu-item b { font-weight: 600; font-size: 14px; }
+.menu-item span { font-size: 12px; color: var(--muted); }
+.drawer-btn, .scrim { display: none; }
+.reset {
+  display: flex; flex-direction: column; align-items: center; gap: 6px; background: var(--panel); border: 1px solid var(--line);
+  border-radius: 999px; padding: 14px 8px; color: var(--muted); transition: color .15s, border-color .15s, background-color .15s;
+}
+.reset:hover { color: var(--fg); border-color: var(--muted); }
+.reset .lbl { writing-mode: vertical-rl; transform: rotate(180deg); font-family: var(--display); font-weight: 700; font-size: 13px; letter-spacing: .1em; text-transform: uppercase; }
+.reset.armed { background: var(--q1); border-color: var(--q1); color: var(--on-q); }
+.reset:disabled { opacity: .4; cursor: default; }
+
+/* ---------- Far right: focus timer ---------- */
+.timer {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px 14px;
+  display: flex; flex-direction: column; align-items: center; gap: 14px; align-self: start; min-width: 0;
+}
+.timer h2 { font-family: var(--display); font-weight: 800; font-size: 22px; text-transform: uppercase; letter-spacing: .02em; margin: 0; align-self: flex-start; }
+.dial { position: relative; width: 100%; max-width: 170px; aspect-ratio: 1; }
+.dial svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.dial .track { stroke: var(--line); }
+.dial .prog { stroke: var(--q1); transition: stroke-dashoffset .3s linear; }
+.timer.done .dial .prog { stroke: var(--q3); }
+.dial .time {
+  position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--display); font-weight: 700;
+  font-size: 40px; font-variant-numeric: tabular-nums; letter-spacing: .01em;
+}
+.dial .state { position: absolute; left: 0; right: 0; bottom: 26%; text-align: center; font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+.t-controls { display: flex; gap: 6px; width: 100%; }
+.t-main { flex: 1; background: var(--fg); color: var(--panel); border: 0; border-radius: 6px; padding: 9px; font-weight: 600; }
+.t-main:hover { opacity: .88; }
+.t-sec { background: none; border: 1px solid var(--line); border-radius: 6px; padding: 9px 12px; color: var(--muted); }
+.t-sec:hover { color: var(--fg); border-color: var(--muted); }
+.t-len { display: flex; align-items: center; gap: 6px; width: 100%; justify-content: center; }
+.t-len input {
+  width: 52px; text-align: center; font: inherit; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--fg);
+  background: transparent; border: 1px solid var(--line); border-radius: 6px; padding: 5px 2px;
+}
+.t-len input:disabled, .t-len button:disabled, .t-presets button:disabled { opacity: .45; cursor: default; }
+.t-len .unit { color: var(--muted); font-size: 13px; }
+.t-step { width: 30px; height: 30px; border: 1px solid var(--line); background: none; border-radius: 50%; font-size: 17px; line-height: 1; color: var(--muted); }
+.t-step:hover:not(:disabled) { color: var(--fg); border-color: var(--muted); }
+.t-presets { display: flex; gap: 4px; width: 100%; }
+.t-presets button { flex: 1; background: none; border: 1px solid var(--line); border-radius: 5px; padding: 4px 0; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.t-presets button.on { border-color: var(--fg); color: var(--fg); font-weight: 600; }
+.ts-presets { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.ts-chime { display: flex; gap: 8px; align-items: end; }
+.ts-chime .set-field { flex: 1; }
+.ts-chime select { width: 100%; font: inherit; font-size: 14px; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 7px 6px; }
+.ts-chime .preview { background: none; border: 1px solid var(--line); border-radius: 6px; padding: 7px 12px; color: var(--fg); white-space: nowrap; }
+.ts-chime .preview:hover { border-color: var(--muted); }
+.confirm-box.ts-box { width: min(480px, 100%); }
+@keyframes softGlow { 0%,100% { box-shadow: 0 0 0 0 transparent; } 50% { box-shadow: 0 0 0 6px var(--q3-tint); } }
+.timer.done { animation: softGlow 2.4s ease-in-out 2; }
+
+/* ---------- Right: matrix ---------- */
+.matrix-wrap { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 10px; min-height: 0; min-width: 0; }
+.axis {
+  font-family: var(--display); font-weight: 800; font-size: 26px; text-transform: none; letter-spacing: .01em;
+  display: flex; align-items: center; justify-content: center; text-align: center; line-height: 1;
+}
+.axis.v { writing-mode: vertical-rl; transform: rotate(180deg); }
+.quad {
+  border-radius: 10px; display: flex; flex-direction: column; min-height: 0; min-width: 0; overflow: hidden;
+  border: 3px solid transparent; transition: transform .12s, border-color .12s;
+}
+.quad { background: var(--box); }
+.quad-hint:empty { display: none; }
+.quad-num { width: auto; min-width: 26px; padding: 0 4px; border-radius: 13px; }
+.split { display: grid; grid-template-rows: 1fr 1fr; gap: 6px; min-height: 0; min-width: 0; }
+.quad.half .quad-head { padding: 8px 12px 4px; }
+.quad.half .quad-title { font-size: 19px; }
+.quad.half .quad-num { width: auto; min-width: 26px; padding: 0 4px; border-radius: 13px; font-size: 13px; }
+.quad.half .chips { min-height: 44px; padding-bottom: 10px; }
+.quad.half .empty-q { padding: 4px 2px; }
+.quad.drop-target { border-color: var(--fg); transform: scale(1.012); }
+.quad-head { display: flex; align-items: center; gap: 10px; padding: 12px 14px 8px; color: var(--on-q); }
+.quad-num {
+  width: 26px; height: 26px; border-radius: 50%; border: 2px solid currentColor; display: grid; place-items: center;
+  font-family: var(--display); font-weight: 700; font-size: 15px; flex: none;
+}
+.quad-title { font-family: var(--display); font-weight: 800; font-size: 24px; text-transform: uppercase; letter-spacing: .03em; }
+.quad-hint { font-size: 13px; opacity: .85; margin-left: auto; text-align: right; }
+.quad-count { font-family: var(--display); font-weight: 600; font-size: 16px; opacity: .9; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.chips { flex: 1; overflow-y: auto; padding: 4px 12px 14px; display: flex; flex-direction: column; gap: 5px; min-height: 60px; }
+.chip {
+  background: var(--panel); color: var(--fg); border-radius: 6px; padding: 7px 8px 7px 10px; display: flex; gap: 8px; align-items: flex-start;
+  box-shadow: 0 1px 2px rgba(0,0,0,.12); cursor: grab; user-select: none; touch-action: none;
+}
+.chip .text { cursor: grab; }
+.chip .cat-tag { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); flex: none; padding-top: 3px; }
+.chip.done .text { text-decoration: line-through; color: var(--muted); }
+.chip.dragging { opacity: .35; }
+.empty-q { color: var(--on-q); opacity: .8; font-size: 14px; padding: 8px 2px; }
+
+.ghost {
+  position: fixed; z-index: 100; pointer-events: none; background: var(--panel); color: var(--fg); border-radius: 6px;
+  padding: 7px 12px; box-shadow: 0 8px 24px rgba(0,0,0,.25); max-width: 300px; font-size: 14px; transform: rotate(-2deg);
+}
+
+@media (max-width: 1700px) {
+  .app { grid-template-columns: minmax(280px, 360px) auto 1fr 210px; }
+  .lists { grid-template-columns: 1fr; grid-template-rows: minmax(0, 2fr) minmax(0, 3fr); }
+}
+@media (max-width: 1180px) and (min-width: 861px) {
+  .app { grid-template-columns: minmax(260px, 340px) auto 1fr; grid-template-rows: 1fr auto; }
+  .lists, .reset-col { grid-row: 1 / 3; }
+  .timer { grid-column: 3; flex-direction: row; flex-wrap: wrap; align-self: stretch; justify-content: center; padding: 10px 14px; }
+  .timer h2 { align-self: center; }
+  .dial { width: 96px; }
+  .dial .time { font-size: 24px; } .dial .state { display: none; }
+  .quad-hint { display: none; }
+  .t-controls, .t-len, .t-presets { width: auto; }
+}
+@media (max-width: 1180px) and (min-width: 861px) {
+  .t-focus { flex-basis: 100%; }
+}
+@media (max-width: 860px) {
+  .timer { order: 0; }
+  body { height: auto; }
+  .app { grid-template-columns: 1fr; height: auto; }
+  .lists { grid-template-rows: auto auto; }
+  .reset { flex-direction: row; padding: 8px 16px; }
+  .reset .lbl { writing-mode: horizontal-tb; transform: none; }
+  .dump-body { max-height: 55vh; }
+  .matrix-wrap { grid-template-columns: 1fr 1fr; grid-template-rows: minmax(220px, auto) minmax(220px, auto); }
+  .axis { font-size: 18px; }
+  .quad-title { font-size: 19px; }
+  .quad-hint { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+@media (max-height: 640px) and (min-width: 861px) {
+  .reset-col { gap: 5px; }
+  .reset-col .reset, .reset-col .drawer-btn { padding: 7px 5px; gap: 3px; }
+  .reset-col .reset .lbl, .reset-col .drawer-btn .lbl { font-size: 10px; letter-spacing: .03em; }
+  .reset-col svg { width: 14px; height: 14px; }
+}
+/* ---------- Narrow windows: lists slide out from the left ---------- */
+@media (max-width: 1180px) {
+  .drawer-btn {
+    display: flex; flex-direction: column; align-items: center; gap: 6px; background: var(--fg); color: var(--panel);
+    border: 0; border-radius: 999px; padding: 14px 8px;
+  }
+  .drawer-btn:hover { opacity: .88; }
+  .drawer-btn .lbl { writing-mode: vertical-rl; transform: rotate(180deg); font-family: var(--display); font-weight: 700; font-size: 13px; letter-spacing: .1em; text-transform: uppercase; }
+  .lists {
+    position: fixed; z-index: 60; top: 0; bottom: 0; left: 0; width: min(400px, 88vw);
+    grid-template-columns: 1fr; grid-template-rows: minmax(0, 2fr) minmax(0, 3fr);
+    background: var(--bg); box-shadow: 8px 0 30px rgba(0,0,0,.25);
+    padding-block: max(12px, env(safe-area-inset-top, 0px)) max(12px, env(safe-area-inset-bottom, 0px));
+    padding-left: max(12px, env(safe-area-inset-left, 0px)); padding-right: 12px;
+    transform: translateX(-105%); visibility: hidden; transition: transform .22s ease, visibility 0s linear .22s;
+  }
+  .drawer-open .lists { transform: none; visibility: visible; transition: transform .22s ease; }
+  .lists .dump-body { max-height: none; }
+  .scrim { display: block; position: fixed; inset: 0; z-index: 55; background: rgba(0,0,0,.28); opacity: 0; pointer-events: none; transition: opacity .2s; }
+  .drawer-open .scrim { opacity: 1; pointer-events: auto; }
+}
+@media (max-width: 1180px) and (min-width: 861px) {
+  .app { grid-template-columns: auto 1fr 200px; grid-template-rows: minmax(0, 1fr); }
+  .reset-col { grid-row: auto; }
+  .timer { grid-column: 3; grid-row: 1; flex-direction: column; flex-wrap: nowrap; align-self: start; justify-content: flex-start; padding: 14px 12px; max-height: 100%; overflow-y: auto; }
+  .timer h2 { align-self: flex-start; }
+  .dial { width: 100%; max-width: 150px; }
+  .dial .time { font-size: 34px; }
+  .dial .state { display: block; }
+  .t-controls, .t-len, .t-presets { width: 100%; }
+}
+@media (max-width: 860px) {
+  .reset-col { flex-direction: row; }
+  .drawer-btn { flex-direction: row; padding: 8px 16px; }
+  .drawer-btn .lbl { writing-mode: horizontal-tb; transform: none; }
+}
+</style>
+</head>
+<body>
+
+
+<div class="app">
+  <div class="scrim" id="scrim"></div>
+  <div class="lists" id="lists">
+  <section class="dump" id="projPanel" aria-label="Projects">
+    <div class="dump-head">
+      <h1 id="projTitle" data-edit-label="projects" title="Double-click to rename">Projects</h1>
+      <span class="tally" id="ptally"></span>
+    </div>
+    <div class="dump-body" id="projBody"></div>
+  </section>
+
+  <section class="dump" id="dump" aria-label="Brain dump list">
+    <div class="dump-head">
+      <h1 id="dumpTitle" data-edit-label="dump" title="Double-click to rename">Brain Dump</h1>
+      <span class="tally" id="tally"></span>
+    </div>
+    <div class="dump-body" id="dumpBody"></div>
+  </section>
+  </div>
+
+  <div class="reset-col">
+    <button class="drawer-btn" id="drawerBtn" aria-controls="lists" aria-expanded="false" title="Show Projects and Brain Dump">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 5h12M4 10h12M4 15h8"/></svg>
+      <span class="lbl">Lists</span>
+    </button>
+    <button class="reset" id="clearDone" title="Take checked-off items off the board">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l3.5 3.5L16 5.5"/></svg>
+      <span class="lbl">Clear completed</span>
+    </button>
+    <button class="reset" id="resetBoard" title="Send every item back to the list">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 10H3M8 5l-5 5 5 5"/></svg>
+      <span class="lbl">Clear board</span>
+    </button>
+    <button class="reset" id="settingsBtn" aria-haspopup="menu" aria-expanded="false" aria-controls="setMenu" title="Customize, export and import">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 5.5h12M4 10h12M4 14.5h12"/></svg>
+      <span class="lbl">Settings</span>
+    </button>
+  </div>
+  <div class="set-menu" id="setMenu" role="menu" aria-label="Settings" hidden>
+    <button class="menu-item" id="customizeBtn" role="menuitem"><b>Customize</b><span>Rename panels and board boxes</span></button>
+    <button class="menu-item" id="timerSetBtn" role="menuitem"><b>Timer</b><span>Quick timers and chime</span></button>
+    <button class="menu-item" id="exportBtn" role="menuitem"><b>Export</b><span>Download a backup file</span></button>
+    <button class="menu-item" id="importBtn" role="menuitem"><b>Import</b><span>Restore from a backup file</span></button>
+    <input type="file" id="importFile" accept=".json,application/json" hidden>
+  </div>
+
+  <section class="matrix-wrap" id="matrix" aria-label="Priority board"></section>
+
+  <aside class="timer" id="timer" aria-label="Focus timer">
+    <h2>Focus</h2>
+    <div class="dial">
+      <svg viewBox="0 0 120 120" aria-hidden="true">
+        <circle class="track" cx="60" cy="60" r="54" fill="none" stroke-width="6"/>
+        <circle class="prog" id="tRing" cx="60" cy="60" r="54" fill="none" stroke-width="6" stroke-linecap="round"/>
+      </svg>
+      <div class="time" id="tTime" role="timer" aria-live="off">30:00</div>
+      <div class="state" id="tState">Ready</div>
+    </div>
+    <div class="t-focus" id="tFocus" aria-label="Working on"></div>
+    <div class="t-controls">
+      <button class="t-main" id="tStart">Start</button>
+      <button class="t-sec" id="tReset" title="Reset timer">Reset</button>
+    </div>
+    <div class="t-len">
+      <button class="t-step" id="tMinus" aria-label="One minute less">&minus;</button>
+      <input id="tMin" type="number" min="1" max="180" value="30" aria-label="Timer length in minutes">
+      <span class="unit">min</span>
+      <button class="t-step" id="tPlus" aria-label="One minute more">+</button>
+    </div>
+    <div class="t-presets" id="tPresets"></div>
+  </aside>
+</div>
+
+<script>
+(function () {
+  const COLORS = ["red", "orange", "amber", "green", "teal", "blue", "indigo", "purple", "pink", "slate"];
+  const POS = ["Top left", "Top right", "Bottom left", "Bottom right"];
+  const DEFAULT_LAYOUT = [[1], [2], [5, 3], [4]];
+  const DEFAULT_BOXES = {
+    1: { title: "Do Now", hint: "Urgent + important", color: "red" },
+    2: { title: "Schedule", hint: "Important, not urgent", color: "blue" },
+    5: { title: "Timebox", hint: "Give it a set slot today", color: "amber" },
+    3: { title: "Quick Win", hint: "Do it fast, keep it small", color: "green" },
+    4: { title: "Blocked", hint: "Waiting on something", color: "orange" }
+  };
+  const clone = o => JSON.parse(JSON.stringify(o));
+  const KEY = "priority-board-v1";
+  let uid = Date.now();
+  const id = () => (uid++).toString(36);
+
+  const seed = {
+    projects: [],
+    cats: [
+      { id: id(), name: "Work", items: [] },
+      { id: id(), name: "Personal", items: [] }
+    ]
+  };
+  seed.cats.forEach(c => c.items = c.items.map(t => ({ id: id(), text: t, q: 0, done: false })));
+
+  let state;
+  try { state = JSON.parse(localStorage.getItem(KEY)); } catch (e) { state = null; }
+  if (!state || !Array.isArray(state.cats)) state = seed;
+  if (!Array.isArray(state.projects)) state.projects = [];
+  if (!state.labels || typeof state.labels !== "object") state.labels = {};
+  const DEFAULT_LABELS = {
+    "projects": "Projects", "dump": "Brain Dump",
+    "q1.title": "Do Now", "q1.hint": "Urgent + important",
+    "q2.title": "Schedule", "q2.hint": "Important, not urgent",
+    "q5.title": "Timebox", "q5.hint": "Give it a set slot today",
+    "q3.title": "Quick Win", "q3.hint": "Do it fast, keep it small",
+    "q4.title": "Blocked", "q4.hint": "Waiting on something"
+  };
+  // board layout: 4 quadrants, each holding 1 or 2 boxes
+  function normalize() {
+    if (!Array.isArray(state.projects)) state.projects = [];
+    if (!state.labels || typeof state.labels !== "object") state.labels = {};
+    if (!Array.isArray(state.layout) || state.layout.length !== 4 || !state.boxes) {
+      state.layout = clone(DEFAULT_LAYOUT);
+      state.boxes = clone(DEFAULT_BOXES);
+      for (const bid of Object.keys(state.boxes)) {   // carry over names set before boxes existed
+        ["title", "hint"].forEach(f => { const k = `q${bid}.${f}`; if (state.labels[k]) state.boxes[bid][f] = state.labels[k]; delete state.labels[k]; });
+      }
+    }
+    const valid = new Set(state.layout.flat());
+    state.cats.concat(state.projects).forEach(c => c.items.forEach(i => { if (i.q && !valid.has(i.q)) i.q = 0; }));
+  }
+  normalize();
+  const THEMES = ["system", "light", "dark", "sepia"];
+  const hostTheme = document.documentElement.getAttribute("data-theme");
+  function applyTheme(t) {
+    const root = document.documentElement;
+    if (t === "light" || t === "dark" || t === "sepia") root.setAttribute("data-theme", t);
+    else if (hostTheme) root.setAttribute("data-theme", hostTheme);
+    else root.removeAttribute("data-theme");
+  }
+  if (!THEMES.includes(state.theme)) state.theme = "system";
+  applyTheme(state.theme);
+  function normalizeTimer() {
+    const t = state.timer;
+    const ok = t && Array.isArray(t.presets) && t.presets.length === 4 && t.presets.every(n => Number.isInteger(n) && n >= 1 && n <= 180);
+    state.timer = { presets: ok ? t.presets : [15, 25, 30, 60], chime: (t && typeof t.chime === "string") ? t.chime : "ding" };
+  }
+  normalizeTimer();
+  const boxNum = bid => {
+    const qi = state.layout.findIndex(cell => cell.includes(bid)); if (qi < 0) return "";
+    const cell = state.layout[qi];
+    return cell.length > 1 ? (qi + 1) + "ab"[cell.indexOf(bid)] : String(qi + 1);
+  };
+  const boxVars = (b) => { const c = b && COLORS.includes(b.color) ? b.color : "slate"; return `--box:var(--c-${c});--box-tint:var(--c-${c}-tint)`; };
+  const bs = bid => boxVars(state.boxes[bid]);
+  const L = k => (state.labels && state.labels[k]) || DEFAULT_LABELS[k];
+  const setLabel = (k, v) => {
+    v = (v || "").trim().slice(0, 40);
+    if (v && v !== DEFAULT_LABELS[k]) state.labels[k] = v; else delete state.labels[k];
+  };
+  const groups = () => state.cats.concat(state.projects);
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} };
+
+  const findItem = iid => {
+    for (const c of groups()) { const it = c.items.find(i => i.id === iid); if (it) return { cat: c, item: it }; }
+    return null;
+  };
+  const esc = s => s.replace(/[&<>"]/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[ch]));
+
+  const ICON = {
+    note: '<svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 2.5h6l3 3v8h-9z"/><path d="M9.5 2.5v3h3"/><path class="lines" d="M5.5 8.5h5M5.5 11h3.5"/></svg>',
+    chev: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 5.5L7 9l3.5-3.5"/></svg>',
+    x: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 3l8 8M11 3l-8 8"/></svg>',
+    grip: '<svg width="10" height="16" viewBox="0 0 10 16" fill="currentColor"><circle cx="3" cy="3" r="1.3"/><circle cx="7" cy="3" r="1.3"/><circle cx="3" cy="8" r="1.3"/><circle cx="7" cy="8" r="1.3"/><circle cx="3" cy="13" r="1.3"/><circle cx="7" cy="13" r="1.3"/></svg>',
+    check: '<svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 6.2l2.4 2.4 4.6-5"/></svg>',
+    trash: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2.5 4h9M5.5 4V2.5h3V4M3.8 4l.6 7.5h5.2l.6-7.5"/></svg>'
+  };
+
+  const dumpBody = document.getElementById("dumpBody");
+  const projBody = document.getElementById("projBody");
+
+  const itemLi = i => `
+          <li class="item${i.done ? " done" : ""}${i.q ? " on" : ""}" data-id="${i.id}" data-q="${i.q || 0}"${i.q ? ` style="${bs(i.q)}"` : ""}>
+            <span class="grip" aria-hidden="true">${ICON.grip}</span>
+            <button class="check" data-toggle="${i.id}" aria-label="Mark done">${ICON.check}</button>
+            <span class="text" data-edit="${i.id}">${esc(i.text)}</span>
+            <button class="icon-btn note-btn${i.note ? " has-note" : ""}" data-note="${i.id}" aria-label="${i.note ? "Edit note" : "Add note"}" title="${i.note ? "Edit note" : "Add note"}">${ICON.note}</button>
+            <button class="icon-btn del" data-del="${i.id}" aria-label="Delete item">${ICON.x}</button>
+          </li>`;
+
+  function render() {
+    // Left list
+    let html = "";
+    state.cats.forEach(c => {
+      html += `<div class="cat" data-cat="${c.id}" data-zone="cat:${c.id}">
+        <div class="cat-head">
+          <span class="cat-name" data-edit-cat="${c.id}" title="Double-click to rename">${esc(c.name)}</span>
+          <span class="cat-count">${c.items.length}</span>
+          <button class="icon-btn" data-del-cat="${c.id}" aria-label="Delete category ${esc(c.name)}" title="Delete category">${ICON.trash}</button>
+        </div>
+        <ul class="items">${c.items.map(itemLi).join("")}
+        </ul>
+        <div class="add-row"><input id="add-${c.id}" data-add="${c.id}" placeholder="Add to ${esc(c.name)}… (paste many lines)" autocomplete="off"></div>
+      </div>`;
+    });
+    html += `<button class="new-cat" id="newCat">+ New category</button>`;
+    dumpBody.innerHTML = html;
+
+    // panel names
+    document.getElementById("projTitle").textContent = L("projects");
+    document.getElementById("dumpTitle").textContent = L("dump");
+    document.getElementById("projPanel").setAttribute("aria-label", L("projects"));
+    document.getElementById("dump").setAttribute("aria-label", L("dump"));
+    document.getElementById("drawerBtn").title = `Show ${L("projects")} and ${L("dump")}`;
+
+    // Projects
+    let ph = "";
+    state.projects.forEach(p => {
+      const open = !p.collapsed;
+      const n = p.items.length, done = p.items.filter(i => i.done).length;
+      ph += `<div class="proj-sec${open ? "" : " collapsed"}" data-zone="proj:${p.id}">
+        <div class="proj-head">
+          <button class="icon-btn chev-btn" data-collapse="${p.id}" aria-expanded="${open}" aria-label="${open ? "Collapse" : "Expand"} ${esc(p.name)}">${ICON.chev}</button>
+          <span class="proj-name" data-edit-proj="${p.id}" title="Double-click to rename">${esc(p.name)}</span>
+          <span class="cat-count">${n ? done + "/" + n : ""}</span>
+          <button class="icon-btn del-proj" data-del-proj="${p.id}" aria-label="Delete ${esc(p.name)}" title="Delete">${ICON.trash}</button>
+        </div>
+        ${n ? `<div class="proj-progress" aria-hidden="true"><span style="width:${Math.round(done / n * 100)}%"></span></div>` : ""}
+        ${open ? `<ul class="items">${p.items.map(itemLi).join("")}</ul>
+        ${n ? "" : `<div class="proj-empty">Drag items here from ${esc(L("dump"))}</div>`}
+        <div class="add-row"><input id="add-${p.id}" data-add="${p.id}" placeholder="Add to ${esc(p.name)}…" autocomplete="off"></div>` : ""}
+      </div>`;
+    });
+    if (!state.projects.length) ph += `<div class="proj-intro">Add an entry to ${esc(L("projects"))}, then drag items from ${esc(L("dump"))} onto it. They move out of ${esc(L("dump"))} and live there instead.</div>`;
+    ph += `<button class="new-cat" id="newProj">+ New</button>`;
+    projBody.innerHTML = ph;
+    document.getElementById("ptally").textContent = state.projects.length ? `${state.projects.length} active` : "";
+
+    const all = groups().flatMap(c => c.items);
+    const sorted = all.filter(i => i.q).length;
+    document.getElementById("tally").textContent = `${sorted} of ${all.length} sorted`;
+    const rb = document.getElementById("resetBoard");
+    rb.disabled = sorted === 0;
+    const doneOnBoard = all.filter(i => i.q && i.done).length;
+    const cd = document.getElementById("clearDone");
+    cd.disabled = doneOnBoard === 0;
+    cd.title = doneOnBoard ? `Take ${doneOnBoard} checked-off item${doneOnBoard > 1 ? "s" : ""} off the board` : "No checked-off items on the board";
+    rb.classList.remove("armed");
+    rb.querySelector(".lbl").textContent = "Clear board";
+
+    // Board
+    const quadHTML = (q, half) => {
+      const box = state.boxes[q];
+      const rows = [];
+      groups().forEach(c => c.items.forEach(i => { if (i.q === q) rows.push({ c, i }); }));
+      return `<div class="quad${half ? " half" : ""}" data-q="${q}" style="${bs(q)}">
+        <div class="quad-head">
+          <span class="quad-title" data-edit-box="${q}" data-field="title" title="Double-click to rename">${esc(box.title)}</span>
+          <span class="quad-count">${rows.length ? rows.length + (rows.length > 1 ? " items" : " item") : ""}</span>
+          <span class="quad-hint" data-edit-box="${q}" data-field="hint" title="Double-click to edit">${esc(box.hint || "")}</span>
+        </div>
+        <div class="chips">${rows.length ? rows.map(({ c, i }) => `
+          <div class="chip${i.done ? " done" : ""}" data-id="${i.id}">
+            <span class="text">${esc(i.text)}</span>
+            <span class="cat-tag">${esc(c.name)}</span>
+            <button class="icon-btn note-btn${i.note ? " has-note" : ""}" data-note="${i.id}" aria-label="${i.note ? "Edit note" : "Add note"}" title="${i.note ? "Edit note" : "Add note"}">${ICON.note}</button>
+            <button class="icon-btn" data-unassign="${i.id}" aria-label="Send back to list" title="Remove from box">${ICON.x}</button>
+          </div>`).join("") : `<div class="empty-q">Drag items here</div>`}
+        </div>
+      </div>`;
+    };
+    document.getElementById("matrix").innerHTML = state.layout.map(cell =>
+      cell.length > 1 ? `<div class="split">${cell.map(q => quadHTML(q, true)).join("")}</div>` : quadHTML(cell[0], false)
+    ).join("");
+    renderFocus();
+  }
+
+  function addItems(catId, raw) {
+    const c = groups().find(c => c.id === catId); if (!c) return;
+    raw.split(/\r?\n/).map(s => s.replace(/^\s*[-*•]\s*/, "").trim()).filter(Boolean)
+      .forEach(t => c.items.push({ id: id(), text: t, q: 0, done: false }));
+    save(); render();
+    const inp = document.getElementById("add-" + catId); if (inp) inp.focus();
+  }
+
+  // ---------- clicks & inputs ----------
+  document.addEventListener("click", e => {
+    const t = e.target.closest("button"); if (!t) return;
+    if (t.dataset.toggle) { const f = findItem(t.dataset.toggle); f.item.done = !f.item.done; save(); render(); }
+    else if (t.dataset.del) { const f = findItem(t.dataset.del); f.cat.items = f.cat.items.filter(i => i !== f.item); save(); render(); }
+    else if (t.dataset.note) { openNote(t.dataset.note, t.closest(".item, .chip") || t); }
+    else if (t.dataset.unassign) { const f = findItem(t.dataset.unassign); f.item.q = 0; save(); render(); }
+    else if (t.dataset.delCat) {
+      const c = state.cats.find(c => c.id === t.dataset.delCat);
+      if (c.items.length && !t.classList.contains("armed")) {
+        t.classList.add("armed"); t.style.color = "var(--q1)"; t.title = `Click again to delete ${c.items.length} items`;
+        setTimeout(() => { t.classList.remove("armed"); t.style.color = ""; t.title = "Delete category"; }, 2500);
+        return;
+      }
+      state.cats = state.cats.filter(x => x !== c); save(); render();
+    }
+    else if (t.id === "clearDone") {
+      groups().forEach(c => c.items.forEach(i => { if (i.done) i.q = 0; }));
+      save(); render();
+    }
+    else if (t.id === "resetBoard") { openConfirm(); }
+    else if (t.dataset.collapse) {
+      const p = state.projects.find(x => x.id === t.dataset.collapse);
+      p.collapsed = !p.collapsed; save(); render();
+    }
+    else if (t.dataset.delProj) {
+      const p = state.projects.find(x => x.id === t.dataset.delProj);
+      if (p.items.length && !t.classList.contains("armed")) {
+        t.classList.add("armed"); t.style.color = "var(--q1)"; t.style.opacity = "1";
+        t.title = `Click again: delete it and send its ${p.items.length} items back to ${L("dump")}`;
+        setTimeout(() => { t.classList.remove("armed"); t.style.color = ""; t.style.opacity = ""; t.title = "Delete"; }, 2500);
+        return;
+      }
+      if (p.items.length) {
+        let home = state.cats[0];
+        if (!home) { home = { id: id(), name: "Unsorted", items: [] }; state.cats.push(home); }
+        home.items.push(...p.items);
+      }
+      state.projects = state.projects.filter(x => x !== p); save(); render();
+    }
+    else if (t.id === "newProj") {
+      const p = { id: id(), name: "Untitled", items: [], collapsed: false };
+      state.projects.push(p); save(); render();
+      startEdit(document.querySelector(`[data-edit-proj="${p.id}"]`), v => { p.name = v || "Untitled"; });
+    }
+    else if (t.id === "newCat") {
+      const c = { id: id(), name: "New category", items: [] };
+      state.cats.push(c); save(); render();
+      startEdit(document.querySelector(`[data-edit-cat="${c.id}"]`), v => { c.name = v || "Untitled"; });
+    }
+  });
+
+  document.addEventListener("keydown", e => {
+    const inp = e.target.closest("[data-add]");
+    if (inp && e.key === "Enter" && inp.value.trim()) { e.preventDefault(); addItems(inp.dataset.add, inp.value); }
+  });
+  document.addEventListener("paste", e => {
+    const inp = e.target.closest("[data-add]"); if (!inp) return;
+    const txt = (e.clipboardData || window.clipboardData).getData("text");
+    if (txt.includes("\n")) { e.preventDefault(); addItems(inp.dataset.add, inp.value + txt); }
+  });
+
+  function startEdit(el, commit) {
+    if (!el) return;
+    el.contentEditable = "true"; el.focus();
+    const r = document.createRange(); r.selectNodeContents(el); const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+    const done = (keep) => {
+      el.contentEditable = "false"; el.removeEventListener("blur", onBlur); el.removeEventListener("keydown", onKey);
+      if (keep) commit(el.textContent.trim()); save(); render();
+    };
+    const onBlur = () => done(true);
+    const onKey = ev => { if (ev.key === "Enter") { ev.preventDefault(); done(true); } if (ev.key === "Escape") done(false); };
+    el.addEventListener("blur", onBlur); el.addEventListener("keydown", onKey);
+  }
+  document.addEventListener("dblclick", e => {
+    const eb = e.target.closest("[data-edit-box]");
+    if (eb) {
+      const bx = state.boxes[eb.dataset.editBox], fld = eb.dataset.field;
+      return startEdit(eb, v => { v = v.slice(0, 40); if (v || fld === "hint") bx[fld] = v; });
+    }
+    const lb = e.target.closest("[data-edit-label]");
+    if (lb) { const k = lb.dataset.editLabel; return startEdit(lb, v => setLabel(k, v)); }
+    const t = e.target.closest("[data-edit]");
+    if (t) { const f = findItem(t.dataset.edit); return startEdit(t, v => { if (v) f.item.text = v; }); }
+    const c = e.target.closest("[data-edit-cat]");
+    if (c) { const cat = state.cats.find(x => x.id === c.dataset.editCat); return startEdit(c, v => { if (v) cat.name = v; }); }
+    const pn = e.target.closest("[data-edit-proj]");
+    if (pn) { const pr = state.projects.find(x => x.id === pn.dataset.editProj); startEdit(pn, v => { if (v) pr.name = v; }); }
+  });
+
+  // ---------- notes ----------
+  const tip = document.createElement("div");
+  tip.className = "note-tip"; tip.hidden = true; tip.setAttribute("role", "tooltip");
+  document.body.appendChild(tip);
+
+  const ed = document.createElement("div");
+  ed.className = "note-edit"; ed.hidden = true; ed.setAttribute("role", "dialog"); ed.setAttribute("aria-label", "Item note");
+  ed.innerHTML = `<div><span class="lbl">Note</span><div class="for" id="noteFor"></div></div>
+    <textarea id="noteText" placeholder="Details, links, next steps…"></textarea>
+    <div class="row"><span class="hint">Ctrl+Enter to save</span>
+      <button class="clear" id="noteClear">Delete note</button>
+      <button class="cancel" id="noteCancel">Cancel</button>
+      <button class="save" id="noteSave">Save</button></div>`;
+  document.body.appendChild(ed);
+  const noteText = ed.querySelector("#noteText");
+  let editing = null;
+
+  function place(el, anchor) {
+    const r = anchor.getBoundingClientRect();
+    el.style.left = "0px"; el.style.top = "0px";
+    const w = el.offsetWidth, h = el.offsetHeight;
+    let left = Math.min(Math.max(8, r.left), innerWidth - w - 8);
+    let top = r.bottom + 6;
+    if (top + h > innerHeight - 8) top = Math.max(8, r.top - h - 6);
+    el.style.left = left + "px"; el.style.top = top + "px";
+  }
+
+  function openNote(iid, anchor) {
+    if (editing) {
+      const wasChip = anchor.classList && anchor.classList.contains("chip");
+      closeNote(true);
+      anchor = document.querySelector(`${wasChip ? ".chip" : ".item"}[data-id="${iid}"]`) || document.body;
+    }
+    const f = findItem(iid); if (!f) return;
+    hideTip();
+    editing = iid;
+    ed.querySelector("#noteFor").textContent = f.item.text;
+    noteText.value = f.item.note || "";
+    ed.querySelector("#noteClear").hidden = !f.item.note;
+    ed.hidden = false; place(ed, anchor);
+    noteText.focus(); noteText.setSelectionRange(noteText.value.length, noteText.value.length);
+  }
+  function closeNote(keep) {
+    if (!editing) return;
+    const f = findItem(editing);
+    if (keep && f) { const v = noteText.value.replace(/\s+$/, ""); if (v) f.item.note = v; else delete f.item.note; }
+    editing = null; ed.hidden = true;
+    save(); render();
+  }
+  ed.querySelector("#noteSave").addEventListener("click", () => closeNote(true));
+  ed.querySelector("#noteCancel").addEventListener("click", () => closeNote(false));
+  ed.querySelector("#noteClear").addEventListener("click", () => { noteText.value = ""; closeNote(true); });
+  noteText.addEventListener("keydown", e => {
+    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); closeNote(true); }
+    if (e.key === "Escape") { e.preventDefault(); closeNote(false); }
+  });
+  // clicking anywhere else saves and closes
+  document.addEventListener("pointerdown", e => {
+    if (editing && !ed.contains(e.target) && !e.target.closest("[data-note]")) closeNote(true);
+  }, true);
+
+  let tipFor = null, tipTimer = null;
+  function hideTip() { clearTimeout(tipTimer); tipTimer = null; tipFor = null; tip.hidden = true; }
+  document.addEventListener("mouseover", e => {
+    const host = e.target.closest(".item, .chip");
+    if (host === tipFor) return;
+    hideTip();
+    if (!host || drag || editing) return;
+    const f = findItem(host.dataset.id);
+    if (!f || !f.item.note) return;
+    tipFor = host;
+    tipTimer = setTimeout(() => {
+      if (tipFor !== host || drag || editing || !host.isConnected) return;
+      tip.innerHTML = `<span class="lbl">Note</span>${esc(f.item.note)}`;
+      tip.hidden = false; place(tip, host);
+    }, 300);
+  });
+  document.addEventListener("scroll", hideTip, true);
+  document.addEventListener("pointerdown", hideTip, true);
+
+  // ---------- settings menu ----------
+  const setMenu = document.getElementById("setMenu");
+  const settingsBtn = document.getElementById("settingsBtn");
+  function openMenu() {
+    setMenu.hidden = false; settingsBtn.setAttribute("aria-expanded", "true");
+    const r = settingsBtn.getBoundingClientRect(), w = setMenu.offsetWidth, h = setMenu.offsetHeight;
+    let left = r.right + 8, top = r.bottom - h;
+    if (left + w > innerWidth - 8) { left = Math.max(8, Math.min(r.left, innerWidth - w - 8)); top = r.bottom + 8; }
+    top = Math.max(8, Math.min(top, innerHeight - h - 8));
+    setMenu.style.left = left + "px"; setMenu.style.top = top + "px";
+    setMenu.querySelector(".menu-item").focus();
+  }
+  function closeMenu(refocus) {
+    if (setMenu.hidden) return;
+    setMenu.hidden = true; settingsBtn.setAttribute("aria-expanded", "false");
+    if (refocus) settingsBtn.focus();
+  }
+  settingsBtn.addEventListener("click", () => setMenu.hidden ? openMenu() : closeMenu(true));
+  setMenu.addEventListener("click", e => { if (e.target.closest(".menu-item")) closeMenu(false); });
+  document.addEventListener("pointerdown", e => {
+    if (!setMenu.hidden && !setMenu.contains(e.target) && !settingsBtn.contains(e.target)) closeMenu(false);
+  }, true);
+  setMenu.addEventListener("keydown", e => {
+    const items = [...setMenu.querySelectorAll(".menu-item")]; const i = items.indexOf(document.activeElement);
+    if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); closeMenu(true); }
+    else if (e.key === "ArrowDown") { e.preventDefault(); items[(i + 1) % items.length].focus(); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); items[(i - 1 + items.length) % items.length].focus(); }
+  });
+  addEventListener("resize", () => closeMenu(false));
+
+  // ---------- customize labels ----------
+  const sd = document.createElement("div");
+  sd.className = "confirm-scrim"; sd.hidden = true;
+  sd.innerHTML = `<form class="confirm-box set-box" role="dialog" aria-modal="true" aria-labelledby="setTitle" id="setForm">
+      <h3 id="setTitle">Customize</h3>
+      <p class="sub">Choose a theme, rename the panels and board boxes, pick their colors, and split any quadrant into two boxes. You can also double-click any name on the page to rename it.</p>
+      <div class="set-group"><h4>Theme</h4>
+        <div class="theme-pick" role="radiogroup" aria-label="Theme">
+          <label><input type="radio" name="theme" value="system"><span class="chip-prev"><i style="background:#f3f4f1"></i><i style="background:#15181a"></i></span>Match computer</label>
+          <label><input type="radio" name="theme" value="light"><span class="chip-prev"><i style="background:#f3f4f1"></i><i style="background:#ffffff"></i></span>Light</label>
+          <label><input type="radio" name="theme" value="dark"><span class="chip-prev"><i style="background:#15181a"></i><i style="background:#1e2225"></i></span>Dark</label>
+          <label><input type="radio" name="theme" value="sepia"><span class="chip-prev"><i style="background:#efe6d4"></i><i style="background:#faf4e7"></i></span>Sepia</label>
+        </div>
+      </div>
+      <div class="set-group"><h4>Panels</h4>
+        <div class="set-row two">
+          <label class="set-field"><span>Left panel</span><input id="set-projects" data-k="projects" maxlength="40"></label>
+          <label class="set-field"><span>List panel</span><input id="set-dump" data-k="dump" maxlength="40"></label>
+        </div>
+      </div>
+      <div class="set-group"><h4>Board <span class="set-count" id="setCount"></span></h4>
+        <div class="set-quads" id="setBoard"></div>
+      </div>
+      <div class="row">
+        <button type="button" class="defaults" id="setDefaults">Reset all to defaults</button>
+        <span class="right"><button type="button" class="cancel" id="setCancel">Cancel</button><button type="submit" class="go">Save</button></span>
+      </div>
+    </form>`;
+  document.body.appendChild(sd);
+  const setInputs = [...sd.querySelectorAll("input[data-k]")];
+  const setBoard = sd.querySelector("#setBoard");
+  let draft = null;
+  const draftNum = (qi, pos) => draft.layout[qi].length > 1 ? (qi + 1) + "ab"[pos] : String(qi + 1);
+  function renderBoardSettings() {
+    const total = draft.layout.flat().length;
+    sd.querySelector("#setCount").textContent = `· ${total} box${total > 1 ? "es" : ""} (4 to 8)`;
+    setBoard.innerHTML = draft.layout.map((cell, qi) => `
+      <div class="set-quad">
+        <div class="set-quad-head"><b>${POS[qi]}</b>
+          <button type="button" class="mini" data-split="${qi}">${cell.length > 1 ? "Merge into one" : "Split in two"}</button>
+        </div>
+        ${cell.map((bid, pos) => { const bx = draft.boxes[bid]; return `
+        <div class="set-row box" style="${boxVars(bx)}">
+          <span class="num" aria-hidden="true"></span>
+          <div class="fields">
+            <label class="set-field"><span>Color</span><select data-b="${bid}" data-f="color">${COLORS.map(c => `<option value="${c}"${c === bx.color ? " selected" : ""}>${c[0].toUpperCase() + c.slice(1)}</option>`).join("")}</select></label>
+            <label class="set-field"><span>Title</span><input data-b="${bid}" data-f="title" maxlength="40" value="${esc(bx.title)}"></label>
+            <label class="set-field"><span>Hint</span><input data-b="${bid}" data-f="hint" maxlength="40" value="${esc(bx.hint || "")}" placeholder="Optional"></label>
+          </div>
+        </div>`; }).join("")}
+        ${cell.length > 1 ? `<span class="note">Merging keeps the top box. Items in the bottom box move into it.</span>` : ""}
+      </div>`).join("");
+  }
+  setBoard.addEventListener("input", e => {
+    const el = e.target.closest("[data-b]"); if (!el) return;
+    draft.boxes[el.dataset.b][el.dataset.f] = el.value;
+    if (el.dataset.f === "color") renderBoardSettings();
+  });
+  setBoard.addEventListener("click", e => {
+    const btn = e.target.closest("[data-split]"); if (!btn) return;
+    const qi = +btn.dataset.split, cell = draft.layout[qi];
+    if (cell.length > 1) { cell.pop(); }
+    else {
+      const used = new Set([...Object.keys(draft.boxes), ...Object.keys(state.boxes)].map(Number));
+      groups().forEach(c => c.items.forEach(i => used.add(i.q)));
+      let nid = 1; while (used.has(nid)) nid++;
+      const taken = new Set(draft.layout.flat().map(b => draft.boxes[b].color));
+      draft.boxes[nid] = { title: "New box", hint: "", color: COLORS.find(c => !taken.has(c)) || "slate" };
+      cell.push(nid);
+    }
+    renderBoardSettings();
+    const again = setBoard.querySelector(`[data-split="${qi}"]`); if (again) again.focus();
+  });
+  function openSettings() {
+    setInputs.forEach(inp => { inp.value = L(inp.dataset.k); inp.placeholder = DEFAULT_LABELS[inp.dataset.k]; });
+    draft = { layout: clone(state.layout), boxes: clone(state.boxes) };
+    renderBoardSettings();
+    sd.querySelectorAll('input[name="theme"]').forEach(r => { r.checked = r.value === state.theme; });
+    sd.hidden = false; setInputs[0].focus(); setInputs[0].select();
+  }
+  const closeSettings = () => { sd.hidden = true; applyTheme(state.theme); document.getElementById("settingsBtn").focus(); };
+  const pickedTheme = () => { const r = sd.querySelector('input[name="theme"]:checked'); return r ? r.value : "system"; };
+  sd.addEventListener("change", e => { if (e.target.name === "theme") applyTheme(e.target.value); });
+  document.getElementById("customizeBtn").addEventListener("click", openSettings);
+  sd.querySelector("#setCancel").addEventListener("click", closeSettings);
+  sd.querySelector("#setDefaults").addEventListener("click", () => {
+    setInputs.forEach(inp => { inp.value = DEFAULT_LABELS[inp.dataset.k]; });
+    draft = { layout: clone(DEFAULT_LAYOUT), boxes: clone(DEFAULT_BOXES) };
+    renderBoardSettings();
+    sd.querySelectorAll('input[name="theme"]').forEach(r => { r.checked = r.value === "system"; });
+    applyTheme("system");
+  });
+  sd.querySelector("#setForm").addEventListener("submit", e => {
+    e.preventDefault();
+    setInputs.forEach(inp => setLabel(inp.dataset.k, inp.value));
+    // items in a box that no longer exists move to the first box of the same quadrant
+    const valid = new Set(draft.layout.flat());
+    groups().forEach(c => c.items.forEach(i => {
+      if (i.q && !valid.has(i.q)) { const qi = state.layout.findIndex(cell => cell.includes(i.q)); i.q = qi >= 0 ? draft.layout[qi][0] : 0; }
+    }));
+    const boxes = {};
+    valid.forEach(bid => {
+      const bx = draft.boxes[bid];
+      boxes[bid] = { title: (bx.title || "").trim().slice(0, 40) || (DEFAULT_BOXES[bid] ? DEFAULT_BOXES[bid].title : "Untitled"), hint: (bx.hint || "").trim().slice(0, 40), color: COLORS.includes(bx.color) ? bx.color : "slate" };
+    });
+    state.layout = draft.layout; state.boxes = boxes; state.theme = pickedTheme();
+    save(); render(); closeSettings();
+  });
+  sd.addEventListener("click", e => { if (e.target === sd) closeSettings(); });
+  sd.addEventListener("keydown", e => { if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); closeSettings(); } });
+
+  // ---------- clear board confirmation ----------
+  const cf = document.createElement("div");
+  cf.className = "confirm-scrim"; cf.hidden = true;
+  cf.innerHTML = `<div class="confirm-box" role="alertdialog" aria-modal="true" aria-labelledby="cfTitle" aria-describedby="cfText">
+      <h3 id="cfTitle">Clear the board?</h3>
+      <p id="cfText"></p>
+      <div class="row"><button class="cancel" id="cfCancel">Cancel</button><button class="go" id="cfGo">Clear board</button></div>
+    </div>`;
+  document.body.appendChild(cf);
+  let cfReturn = null;
+  function openConfirm() {
+    const n = groups().reduce((a, c) => a + c.items.filter(i => i.q).length, 0);
+    if (!n) return;
+    cf.querySelector("#cfText").textContent = `This takes all ${n} item${n > 1 ? "s" : ""} off the board and back to plain items in your lists. Your tasks, notes and check-offs stay.`;
+    cfReturn = document.activeElement;
+    cf.hidden = false; cf.querySelector("#cfCancel").focus();
+  }
+  function closeConfirm(go) {
+    if (cf.hidden) return;
+    cf.hidden = true;
+    if (go) { groups().forEach(c => c.items.forEach(i => { i.q = 0; })); save(); render(); }
+    else if (cfReturn && cfReturn.isConnected) cfReturn.focus();
+  }
+  cf.querySelector("#cfCancel").addEventListener("click", () => closeConfirm(false));
+  cf.querySelector("#cfGo").addEventListener("click", () => closeConfirm(true));
+  cf.addEventListener("click", e => { if (e.target === cf) closeConfirm(false); });
+  cf.addEventListener("keydown", e => {
+    if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); closeConfirm(false); }
+    if (e.key === "Tab") { // keep focus inside the dialog
+      const b = [...cf.querySelectorAll("button")]; const i = b.indexOf(document.activeElement);
+      e.preventDefault(); b[(i + (e.shiftKey ? -1 : 1) + b.length) % b.length].focus();
+    }
+  });
+
+  // ---------- slide-out lists (narrow windows) ----------
+  const listsEl = document.getElementById("lists");
+  const drawerBtn = document.getElementById("drawerBtn");
+  function setDrawer(open) {
+    document.body.classList.toggle("drawer-open", open);
+    drawerBtn.setAttribute("aria-expanded", open);
+  }
+  drawerBtn.addEventListener("click", () => setDrawer(!document.body.classList.contains("drawer-open")));
+  document.getElementById("scrim").addEventListener("click", () => setDrawer(false));
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && !editing) setDrawer(false); });
+  const drawerMode = () => getComputedStyle(drawerBtn).display !== "none";
+
+  // ---------- click a board card or timer task to find it in the lists ----------
+  let justDragged = false;
+  function locate(iid) {
+    const f = findItem(iid); if (!f) return;
+    let changed = false;
+    if (state.projects.includes(f.cat) && f.cat.collapsed) { f.cat.collapsed = false; changed = true; }
+    if (changed) { save(); render(); }
+    if (drawerMode()) setDrawer(true);
+    const li = document.querySelector(`.lists .item[data-id="${iid}"]`); if (!li) return;
+    li.scrollIntoView({ block: "center", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+    li.classList.remove("locate"); void li.offsetWidth; li.classList.add("locate");
+    clearTimeout(li._loc); li._loc = setTimeout(() => li.classList.remove("locate"), 2000);
+  }
+  document.addEventListener("click", e => {
+    if (justDragged || e.target.closest("button, input, [contenteditable='true']")) return;
+    const card = e.target.closest(".chip, .f-item"); if (!card) return;
+    locate(card.dataset.id);
+  });
+
+  // ---------- drag (pointer-based: mouse, pen and touch) ----------
+  let drag = null;
+  document.addEventListener("pointerdown", e => {
+    if (e.button !== 0) return;
+    const src = e.target.closest(".item, .chip"); if (!src) return;
+    if (e.target.closest("button, input, [contenteditable='true']")) return;
+    if (e.pointerType === "touch" && src.classList.contains("item") && !e.target.closest(".grip")) return;
+    drag = { id: src.dataset.id, src, isChip: src.classList.contains("chip"), x: e.clientX, y: e.clientY, started: false, pid: e.pointerId };
+  });
+  document.addEventListener("pointermove", e => {
+    if (!drag || e.pointerId !== drag.pid) return;
+    if (!drag.started) {
+      if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 5) return;
+      drag.started = true;
+      drag.src.classList.add("dragging");
+      drag.ghost = document.createElement("div");
+      drag.ghost.className = "ghost";
+      drag.ghost.textContent = findItem(drag.id).item.text;
+      document.body.appendChild(drag.ghost);
+      getSelection().removeAllRanges();
+    }
+    e.preventDefault();
+    if (document.body.classList.contains("drawer-open") && drawerMode() && e.clientX > listsEl.getBoundingClientRect().right + 8) setDrawer(false);
+    drag.ghost.style.left = (e.clientX + 12) + "px";
+    drag.ghost.style.top = (e.clientY + 8) + "px";
+    const under = document.elementFromPoint(e.clientX, e.clientY);
+    const target = under && (under.closest(".quad") || under.closest(".timer") || under.closest("[data-zone]") || (drag.isChip ? under.closest(".dump") : null));
+    if (target !== drag.target) {
+      drag.target && drag.target.classList.remove("drop-target");
+      drag.target = target;
+      target && target.classList.add("drop-target");
+    }
+  }, { passive: false });
+  const endDrag = e => {
+    if (!drag || e.pointerId !== drag.pid) return;
+    if (drag.started) {
+      justDragged = true; setTimeout(() => { justDragged = false; }, 0);
+      drag.ghost.remove();
+      drag.src.classList.remove("dragging");
+      const t = drag.target;
+      if (t) {
+        t.classList.remove("drop-target");
+        const f = findItem(drag.id);
+        if (t.classList.contains("timer")) addFocus(f.item.id);
+        else if (t.classList.contains("quad")) f.item.q = +t.dataset.q;
+        else if (drag.isChip) f.item.q = 0; // card dragged off the board
+        else if (t.dataset.zone) {
+          const [kind, zid] = t.dataset.zone.split(":");
+          const dest = (kind === "proj" ? state.projects : state.cats).find(x => x.id === zid);
+          if (dest && dest !== f.cat) {
+            f.cat.items = f.cat.items.filter(i => i !== f.item);
+            dest.items.push(f.item);
+          }
+        }
+        save(); render();
+      }
+    }
+    drag = null;
+  };
+  document.addEventListener("pointerup", endDrag);
+  document.addEventListener("pointercancel", endDrag);
+
+  document.getElementById("exportBtn").addEventListener("click", () => {
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "priority-board-backup-" + new Date().toISOString().slice(0, 10) + ".json";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  });
+  const fileIn = document.getElementById("importFile");
+  document.getElementById("importBtn").addEventListener("click", () => fileIn.click());
+  fileIn.addEventListener("change", () => {
+    const f = fileIn.files[0]; if (!f) return;
+    f.text().then(txt => {
+      const data = JSON.parse(txt);
+      if (!data || !Array.isArray(data.cats)) throw new Error("bad file");
+      state = data; normalize(); normalizeTimer(); if (!THEMES.includes(state.theme)) state.theme = "system"; applyTheme(state.theme); save(); render(); renderPresets(); paint();
+    }).catch(() => alert("That file isn't a Priority Board backup.")).finally(() => { fileIn.value = ""; });
+  });
+
+  // keep two open tabs in sync
+  window.addEventListener("storage", e => {
+    if (e.key === KEY && e.newValue) { try { state = JSON.parse(e.newValue); render(); } catch (err) {} }
+  });
+
+  // ---------- focus timer ----------
+  const TKEY = "priority-board-timer-v1";
+  let T;
+  try { T = JSON.parse(localStorage.getItem(TKEY)); } catch (e) { T = null; }
+  if (!T || typeof T.mins !== "number") T = { mins: 30, endAt: null, left: null };
+  if (!Array.isArray(T.focus)) T.focus = [];
+  const saveT = () => { try { localStorage.setItem(TKEY, JSON.stringify(T)); } catch (e) {} };
+
+  const el = idx => document.getElementById(idx);
+  const timerEl = el("timer"), ring = el("tRing"), CIRC = 2 * Math.PI * 54;
+  ring.style.strokeDasharray = CIRC;
+  const baseTitle = document.title;
+  let finished = false;
+
+  const total = () => T.mins * 60000;
+  const remaining = () => T.endAt ? Math.max(0, T.endAt - Date.now()) : (T.left != null ? T.left : total());
+  const fmt = ms => { const s = Math.ceil(ms / 1000); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); };
+
+  // soft two-note chime, played once
+  let ac = null;
+  const audio = () => {
+    try {
+      if (!ac) ac = new (window.AudioContext || window.webkitAudioContext)();
+      if (ac.state === "suspended") ac.resume();
+    } catch (e) {}
+    return ac;
+  };
+  document.addEventListener("pointerdown", audio, { once: true });
+  function ding(ctx, freq, t0, decay = 2.6, vol = 0.16) {
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.linearRampToValueAtTime(vol, t0 + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + decay);
+    g.connect(ctx.destination);
+    [[freq, 1], [freq * 2, 0.18], [freq * 3, 0.05]].forEach(([f, v]) => {
+      const o = ctx.createOscillator(), og = ctx.createGain();
+      o.type = "sine"; o.frequency.value = f; og.gain.value = v;
+      o.connect(og); og.connect(g); o.start(t0); o.stop(t0 + decay + 0.1);
+    });
+  }
+  const CHIMES = {
+    ding:    { label: "Soft ding (two notes)", play: (c, t) => { ding(c, 784, t); ding(c, 659.3, t + 0.5); } },
+    bell:    { label: "Single bell",           play: (c, t) => { ding(c, 523.3, t, 3.6, 0.18); } },
+    rise:    { label: "Rising three notes",    play: (c, t) => { ding(c, 523.3, t, 1.6); ding(c, 659.3, t + 0.3, 1.6); ding(c, 784, t + 0.6, 2.4); } },
+    marimba: { label: "Marimba",               play: (c, t) => { ding(c, 587.3, t, 0.7, 0.2); ding(c, 880, t + 0.22, 0.9, 0.2); } },
+    glass:   { label: "Glass tap",             play: (c, t) => { ding(c, 1318.5, t, 1.8, 0.09); ding(c, 1568, t + 0.12, 1.8, 0.07); } },
+    none:    { label: "No sound",              play: () => {} }
+  };
+  function chime(which) {
+    const ch = CHIMES[which || state.timer.chime] || CHIMES.ding;
+    if (ch === CHIMES.none) return;
+    const ctx = audio(); if (!ctx) return;
+    ch.play(ctx, ctx.currentTime + 0.05);
+  }
+
+  function paint() {
+    const r = remaining();
+    const running = !!T.endAt, paused = !running && T.left != null && T.left > 0;
+    el("tTime").textContent = finished ? "0:00" : fmt(r);
+    ring.style.strokeDashoffset = CIRC * (1 - (finished ? 1 : 1 - r / total()));
+    el("tState").textContent = finished ? "Time's up" : running ? "Focusing" : paused ? "Paused" : "Ready";
+    el("tStart").textContent = running ? "Pause" : paused ? "Resume" : "Start";
+    timerEl.classList.toggle("done", finished);
+    const lock = running || paused;
+    el("tMin").value = T.mins;
+    ["tMin", "tMinus", "tPlus"].forEach(i => el(i).disabled = lock);
+    el("tPresets").querySelectorAll("button").forEach(b => { b.disabled = lock; b.classList.toggle("on", +b.dataset.min === T.mins); });
+    const firstFocus = T.focus.map(findItem).find(Boolean);
+    document.title = running ? "▶ " + fmt(r) + " · " + (firstFocus ? firstFocus.item.text : baseTitle) : finished ? "Time's up · " + baseTitle : baseTitle;
+  }
+  function tick() {
+    if (T.endAt && Date.now() >= T.endAt) {
+      T.endAt = null; T.left = null; finished = true; saveT(); chime();
+    }
+    paint();
+  }
+  // timer that ran out while the page was closed: show done, no sound
+  if (T.endAt && Date.now() >= T.endAt) { T.endAt = null; T.left = null; finished = true; saveT(); }
+  setInterval(tick, 250);
+
+  el("tStart").addEventListener("click", () => {
+    audio();
+    if (T.endAt) { T.left = remaining(); T.endAt = null; }
+    else { finished = false; T.endAt = Date.now() + remaining(); T.left = null; }
+    saveT(); paint();
+  });
+  el("tReset").addEventListener("click", () => { T.endAt = null; T.left = null; finished = false; saveT(); paint(); });
+  const setMins = m => { T.mins = Math.min(180, Math.max(1, Math.round(m) || 30)); T.left = null; finished = false; saveT(); paint(); };
+  el("tMinus").addEventListener("click", () => setMins(T.mins - 1));
+  el("tPlus").addEventListener("click", () => setMins(T.mins + 1));
+  el("tMin").addEventListener("change", e => setMins(+e.target.value));
+  el("tPresets").addEventListener("click", e => { const b = e.target.closest("button"); if (b) setMins(+b.dataset.min); });
+  function renderFocus() {
+    const box = document.getElementById("tFocus"); if (!box) return;
+    T.focus = T.focus.filter(fid => findItem(fid));
+    const rows = T.focus.map(findItem);
+    box.innerHTML = rows.length
+      ? `<span class="lbl">Working on</span>` + rows.map(({ item: i }) => `
+        <div class="f-item${i.done ? " done" : ""}${i.q ? " on" : ""}" data-q="${i.q || 0}" data-id="${i.id}"${i.q ? ` style="${bs(i.q)}"` : ""} title="Show in list">
+          <span class="text">${esc(i.text)}</span>
+          <button class="icon-btn" data-unfocus="${i.id}" aria-label="Remove from timer" title="Remove from timer">${ICON.x}</button>
+        </div>`).join("")
+      : `<div class="empty">Drag a task here to set what this timer is for</div>`;
+  }
+  function addFocus(fid) {
+    if (!T.focus.includes(fid)) T.focus.push(fid);
+    saveT();
+  }
+  document.getElementById("tFocus").addEventListener("click", e => {
+    const b = e.target.closest("[data-unfocus]"); if (!b) return;
+    T.focus = T.focus.filter(fid => fid !== b.dataset.unfocus);
+    saveT(); renderFocus(); paint();
+  });
+
+  function renderPresets() {
+    el("tPresets").innerHTML = state.timer.presets.map(m => `<button data-min="${m}" aria-label="${m} minutes">${m}</button>`).join("");
+  }
+  renderPresets();
+
+  // ---------- timer settings ----------
+  const tsd = document.createElement("div");
+  tsd.className = "confirm-scrim"; tsd.hidden = true;
+  tsd.innerHTML = `<form class="confirm-box set-box ts-box" role="dialog" aria-modal="true" aria-labelledby="tsTitle" id="tsForm">
+      <h3 id="tsTitle">Timer</h3>
+      <p class="sub">Set the four quick-timer buttons and choose the sound that plays when time is up.</p>
+      <div class="set-group"><h4>Quick timers (minutes)</h4>
+        <div class="ts-presets">${[0, 1, 2, 3].map(i => `<label class="set-field"><span>Button ${i + 1}</span><input id="ts-p${i}" type="number" min="1" max="180" step="1" required></label>`).join("")}</div>
+      </div>
+      <div class="set-group"><h4>Chime</h4>
+        <div class="ts-chime">
+          <label class="set-field"><span>Sound</span><select id="ts-chime">${Object.entries(CHIMES).map(([k, v]) => `<option value="${k}">${v.label}</option>`).join("")}</select></label>
+          <button type="button" class="preview" id="tsPreview">Preview</button>
+        </div>
+      </div>
+      <div class="row">
+        <button type="button" class="defaults" id="tsDefaults">Reset to defaults</button>
+        <span class="right"><button type="button" class="cancel" id="tsCancel">Cancel</button><button type="submit" class="go">Save</button></span>
+      </div>
+    </form>`;
+  document.body.appendChild(tsd);
+  const tsP = [0, 1, 2, 3].map(i => tsd.querySelector("#ts-p" + i));
+  const tsChime = tsd.querySelector("#ts-chime");
+  function openTimerSettings() {
+    state.timer.presets.forEach((m, i) => { tsP[i].value = m; });
+    tsChime.value = CHIMES[state.timer.chime] ? state.timer.chime : "ding";
+    tsd.hidden = false; tsP[0].focus(); tsP[0].select();
+  }
+  const closeTimerSettings = () => { tsd.hidden = true; document.getElementById("settingsBtn").focus(); };
+  document.getElementById("timerSetBtn").addEventListener("click", openTimerSettings);
+  tsd.querySelector("#tsCancel").addEventListener("click", closeTimerSettings);
+  tsd.querySelector("#tsPreview").addEventListener("click", () => chime(tsChime.value));
+  tsd.querySelector("#tsDefaults").addEventListener("click", () => { [15, 25, 30, 60].forEach((m, i) => { tsP[i].value = m; }); tsChime.value = "ding"; });
+  tsd.querySelector("#tsForm").addEventListener("submit", e => {
+    e.preventDefault();
+    state.timer.presets = tsP.map(inp => Math.min(180, Math.max(1, Math.round(+inp.value) || 30)));
+    state.timer.chime = tsChime.value;
+    save(); renderPresets(); paint(); closeTimerSettings();
+  });
+  tsd.addEventListener("click", e => { if (e.target === tsd) closeTimerSettings(); });
+  tsd.addEventListener("keydown", e => { if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); closeTimerSettings(); } });
+
+  paint();
+
+  render();
+})();
+</script>
+
+</body>
+</html>
